@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AngularJs-列表增删改查</title>
+    <style>
+        .container-input{
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index:2;
+            background: rgba(0,0,0,.3);
+            padding-top:65px;
+        }
+        .book-form{
+            width: 350px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 15px;
+        }
+        .book-body{
+            padding-top:15px;
+        }
+        .book-footer{
+            text-align: right;
+        }
+        .btn{
+            display:inline-block;
+            background: #559ff3;
+            color: #fff;
+            border: none;
+            -webkit-border-radius:2px;
+            -moz-border-radius:2px;
+            border-radius:2px;
+            font-size: 12px;
+            padding:3px 12px;
+        }
+        .btn.btn-edit{
+            padding:2px 6px;
+        }
+        .btn.btn-delete{
+            padding:2px 6px;
+        }
+        .control-label{
+            display: block;
+            margin-bottom:10px;
+        }
+        .control-label span{
+            display: inline-block;
+            width:64px;
+            text-align: right;
+        }
+        .container-table{
+            margin-top:10px;
+        }
+        .table{
+            width:600px;
+            border-collapse: collapse;
+        }
+        .table th{
+            color: #505050;
+            font-size: 12px;
+            border:1px solid #e5e5e5;
+            background: #e5e5e5;
+            padding:3px 0;
+        }
+        .table td{
+            color: #505050;
+            font-size: 12px;
+            border:1px solid #e5e5e5;
+            text-align: center;
+            padding:3px 0;
+        }
+    </style>
+</head>
+<body ng-app="myApp">
+    <div ng-controller="myCtrl">
+        <h1>Book Store</h1>
+        <div class="container">
+            <div class="container-btn">
+                <input type="text" ng-model="book.search">
+                <button class="btn btn-search" ng-click="search()">搜索书目</button>
+                <button class="btn btn-search" ng-click="clear()">清空</button>
+                <button class="btn btn-add" ng-click="show()">添加书目</button>
+            </div>
+            <div class="container-table" ng-if="lists.length">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>书名</th>
+                            <th>作者</th>
+                            <th>出版社</th>
+                            <th>价格</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-if="!is_search" ng-repeat="item in lists track by $index">
+                            <td>{{$index+1}}</td>
+                            <td>{{item.name}}</td>
+                            <td>{{item.author}}</td>
+                            <td>{{item.press}}</td>
+                            <td>{{item.price}}</td>
+                            <td>
+                                <button class="btn btn-edit" ng-click="edit($index)">编辑</button>
+                                <button class="btn btn-delete" ng-click="remove($index)">删除</button>
+                            </td>
+                        </tr>
+                        <tr ng-if="is_search" ng-repeat="item in searchlist track by $index">
+                            <td>{{$index+1}}</td>
+                            <td>{{item.name}}</td>
+                            <td>{{item.author}}</td>
+                            <td>{{item.press}}</td>
+                            <td>{{item.price}}</td>
+                            <td>
+                                <button class="btn btn-edit" ng-click="edit($index)">编辑</button>
+                                <button class="btn btn-delete" ng-click="remove($index)">删除</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="container-input" ng-if="is_show" ng-controller="addCtrl">
+        <form class="book-form">
+            <div class="book-header">添加书目</div>
+            <div class="book-body">
+                <label class="control-label"><span>编号：</span><input type="text" ng-model="book.id" ng-disabled="is_edit"></label>
+                <label class="control-label"><span>书名：</span><input type="text" ng-model="book.name"></label>
+                <label class="control-label"><span>作者：</span><input type="text" ng-model="book.author"></label>
+                <label class="control-label"><span>出版社：</span><input type="text" ng-model="book.press"></label>
+                <label class="control-label"><span>价格：</span><input type="text" ng-model="book.price"></label>
+            </div>
+            <div class="book-footer">
+                <button class="btn btn-cancel" ng-click="cancel()">取消</button>
+                <button class="btn btn-save" ng-click="add()">确定</button>
+            </div>
+        </form>
+    </div>
+<script type="text/javascript" src="js/angular.js"></script>
+<script>
+    var myApp=angular.module('myApp',[]);
+    myApp.controller('myCtrl',function($scope,$rootScope){
+        $rootScope.is_show=false;
+        $rootScope.is_edit=false;
+        $scope.is_search=false;
+        $rootScope.show=function(){
+          $rootScope.is_show=true;
+        };
+        $scope.lists=[{
+            id:'1',
+            name:'平凡的世界',
+            author:'路遥',
+            press:'人民出版社',
+            price:'23'
+        },{
+            id:"2",
+            name:'老人与海',
+            author:'海明威',
+            press:'人民出版社',
+            price:'18'
+        },{
+            id:"3",
+            name:'最好的我们',
+            author:'八月长安',
+            press:'人民出版社',
+            price:'15'
+        }];
+        $rootScope.$on('add-book',function(e,param){
+            if(!$scope.is_edit){
+                $scope.booklist=param;
+                $scope.lists.push($scope.booklist);
+            }
+        });
+        $rootScope.$on('edit-book',function(e,param){
+            if($scope.is_search){
+                angular.forEach($scope.searchlist,function(item,index){
+                    if(item.id==param.id){
+                        $scope.searchlist[index]=param;
+                    }
+                })
+            }else{
+                angular.forEach($scope.lists,function(item,index){
+                    if(item.id==param.id){
+                        $scope.lists[index]=param;
+                    }
+                })
+            }
+        });
+//        删除
+        $scope.remove=function(index){
+            $scope.lists.splice(index, 1);
+        };
+//        编辑
+        $scope.booklist={
+            id:'',
+            name:'',
+            author:'',
+            press:'',
+            price:''
+        };
+        $scope.edit=function(index){
+            $rootScope.is_show=true;
+            $rootScope.is_edit=true;
+            if($scope.is_search){
+               $scope.booklist=$scope.searchlist[index];
+            }else{
+                console.log('aaa');
+                $scope.booklist=$scope.lists[index];
+            }
+            console.log($scope.booklist);
+            $rootScope.$emit('edit',$scope.booklist);
+        };
+//        搜索
+        $scope.searchlist=[];
+        $scope.search=function(){
+            $scope.is_search=true;
+            angular.forEach($scope.lists,function(item,index){
+                for(key in item){
+                    console.log(item[key]);
+                    if(item[key].indexOf($scope.book.search)!=-1){
+                        $scope.searchlist.push(item);
+                        break;
+                    }
+                }
+            })
+        };
+        $scope.clear=function(){
+            $scope.book.search='';
+            $scope.searchlist=[];
+            $scope.is_search=false;
+        }
+    }).controller('addCtrl',function($scope,$rootScope){
+        $scope.books={};
+        $scope.bookss={
+            id:'',
+            name:'',
+            author:'',
+            press:'',
+            price:''
+        };
+        $rootScope.$on('edit',function(e,param){
+            console.log(param);
+            $rootScope.books=angular.copy(param);
+            return $rootScope.books;
+        });
+        $scope.book=$rootScope.is_edit?$rootScope.books:$scope.bookss;
+        $scope.add=function(){
+           $rootScope.is_show=false;
+            if($rootScope.is_edit){
+                $rootScope.$emit('edit-book', $scope.book);
+            }else{
+                $rootScope.$emit('add-book', $scope.book);
+            }
+        };
+        $scope.cancel=function(){
+            $rootScope.is_show=false;
+            $rootScope.is_edit=false;
+        }
+    });
+</script>
+</body>
+</html>
