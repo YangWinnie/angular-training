@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AngularJs-列表增删改查(指令)</title>
+    <style>
+        .search-input{
+            width:180px;
+        }
+        .container-input{
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index:2;
+            background: rgba(0,0,0,.3);
+            padding-top:65px;
+        }
+        .book-form{
+            width: 300px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 15px;
+        }
+        .book-body{
+            padding-top:15px;
+        }
+        .book-body input{
+            width: 230px;
+        }
+        .book-footer{
+            text-align: right;
+        }
+        .btn{
+            display:inline-block;
+            background: #559ff3;
+            color: #fff;
+            border: none;
+            -webkit-border-radius:2px;
+            -moz-border-radius:2px;
+            border-radius:2px;
+            font-size: 12px;
+            padding:3px 12px;
+        }
+        .btn.btn-edit{
+            padding:2px 6px;
+        }
+        .btn.btn-delete{
+            padding:2px 6px;
+        }
+        .control-label{
+            display: block;
+            margin-bottom:10px;
+        }
+        .control-label .control-label-title{
+            display: inline-block;
+            width:64px;
+            text-align: right;
+        }
+        .container-table{
+            margin-top:10px;
+        }
+        .table{
+            width:640px;
+            border-collapse: collapse;
+        }
+        .table input{
+            width:100px;
+        }
+        .table th{
+            color: #505050;
+            font-size: 12px;
+            border:1px solid #e5e5e5;
+            background: #e5e5e5;
+            padding:3px 0;
+        }
+        .table td{
+            color: #505050;
+            font-size: 12px;
+            border:1px solid #e5e5e5;
+            text-align: center;
+            padding:3px 0;
+        }
+        button[disabled]{
+            cursor: not-allowed;
+            opacity: 0.65;
+        }
+        .error-text{
+            color: red;
+        }
+        .error-input{
+            border-color: red;
+        }
+    </style>
+</head>
+<body ng-app="myApp">
+    <div ng-controller="myCtrl">
+        <h1>Book Store</h1>
+        <div class="container">
+            <div class="container-btn">
+                <input class="search-input" type="text" ng-model="content">
+                <button class="btn btn-search" ng-click="search(content)">搜索书目</button>
+                <button class="btn btn-search" ng-click="clear()">清空</button>
+                <button class="btn btn-add" ng-click="show()">添加书目</button>
+            </div>
+            <div class="container-table" ng-if="booklist.length">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>书名</th>
+                            <th>作者</th>
+                            <th>出版社</th>
+                            <th>价格</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in booklist track by $index" ng-cloak>
+                            <td>{{$index+1}}</td>
+                            <td>
+                                <span ng-if="!is_edit" ng-cloak>{{item.name}}</span>
+                                <input ng-if="is_edit" type="text" ng-model="item.name">
+                            </td>
+                            <td>
+                                <span ng-if="!is_edit">{{item.author}}</span>
+                                <input ng-if="is_edit" type="text" ng-model="item.author">
+                            </td>
+                            <td>
+                                <span ng-if="!is_edit">{{item.press}}</span>
+                                <input ng-if="is_edit" type="text" ng-model="item.press">
+                            </td>
+                            <td>
+                                <span ng-if="!is_edit">{{item.price}}</span>
+                                <input ng-if="is_edit" type="text" ng-model="item.price">
+                            </td>
+                            <td>
+                                <btn-edit></btn-edit>
+                                <btn-remove ng-if="!is_search"></btn-remove>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="container-input" ng-if="is_show" ng-cloak>
+                <form class="book-form" name="bookForm" novalidate>
+                    <div class="book-header">添加书目</div>
+                    <div class="book-body">
+                        <label class="control-label"><span class="control-label-title">书名：</span><input type="text" ng-model="book.name"></label>
+                        <label class="control-label"><span class="control-label-title">作者：</span><input type="text" ng-model="book.author"></label>
+                        <label class="control-label"><span class="control-label-title">出版社：</span><input type="text" ng-model="book.press"></label>
+                        <label class="control-label"><span class="control-label-title">价格：</span><input type="text" ng-model="book.price"></label>
+                    </div>
+                    <div class="book-footer">
+                        <button class="btn btn-cancel" ng-click="cancel()">取消</button>
+                        <button class="btn btn-save" ng-click="save()">确定</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+<script type="text/javascript" src="js/angular.js"></script>
+<script type="text/ng-template" id="btn-edit.html">
+    <button ng-if="!is_edit" class="btn btn-edit" ng-click="edit()">编辑</button>
+    <button ng-if="is_edit" class="btn btn-edit" ng-click="save()">保存</button>
+</script>
+<script type="text/ng-template" id="btn-remove.html">
+    <button class="btn btn-remove" ng-click="remove($index)">删除</button>
+</script>
+<script>
+    var myApp=angular.module('myApp',[])
+    .controller('myCtrl',function($scope,$rootScope){
+        $scope.is_show=false;
+        $scope.lists=[
+        {
+            name:'平凡的世界',
+            author:'路遥',
+            press:'人民出版社',
+            price:'23'
+        },{
+            name:'老人与海',
+            author:'海明威',
+            press:'人民出版社',
+            price:'18'
+        },{
+            name:'最好的我们',
+            author:'八月长安',
+            press:'人民出版社',
+            price:'15'
+        }];
+//        添加
+        $scope.book={
+            name:'',
+            author:'',
+            press:'',
+            price:''
+        };
+        $scope.show=function(){
+            $scope.is_show=true;
+            $scope.book={
+                name:'',
+                author:'',
+                press:'',
+                price:''
+            };
+        };
+        $scope.save=function(){
+            $scope.lists.push($scope.book);
+            $scope.is_show=false;
+        };
+        $scope.cancel=function(){
+            $scope.is_show=false;
+        };
+//        搜索
+        $scope.is_search=false;
+        $scope.searchlist=[];
+        $scope.booklist=$scope.lists;
+        $scope.content='';
+        $scope.search=function(param){
+            $scope.searchlist=[];
+            $scope.is_search=true;
+            angular.forEach($scope.lists,function(item,index){
+                for(var key in item){
+                    if(item[key].indexOf(param)!=-1){
+                        $scope.searchlist.push(item);
+                        break;
+                    }
+                }
+            });
+            $scope.booklist=$scope.searchlist;
+        };
+//        清空
+        $scope.clear=function(){
+            $scope.is_search=false;
+            $scope.content='';
+            $scope.searchlist=[];
+            $scope.booklist=$scope.lists;
+        }
+    })
+    .directive('btnEdit',function(){
+        return {
+            restrict:'EA',
+            transclude:true,
+            templateUrl: 'btn-edit.html',
+            controller:function ($scope) {
+                $scope.is_edit=false;
+                $scope.edit=function(){
+                    $scope.is_edit=true;
+                };
+                $scope.save=function(){
+                    $scope.is_edit=false;
+                }
+            }
+        }
+    })
+    .directive('btnRemove',function(){
+        return {
+            restrict:'EA',
+            transclude:true,
+            templateUrl: 'btn-remove.html',
+            controller:function ($scope) {
+                $scope.remove=function(index){
+                    console.log(index);
+                    $scope.lists.splice(index, 1);
+                };
+            }
+        }
+    });
+</script>
+</body>
+</html>

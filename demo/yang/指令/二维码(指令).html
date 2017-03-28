@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>二维码-指令</title>
+    <style>
+        .qr-code{
+            position: relative;
+        }
+        .qr-code-box{
+            position: absolute;
+            left:22px;
+            top:-4px;
+            background: #fff;
+            border: 1px solid #477cd7;
+        }
+        .qr-code-box:before {
+             position: absolute;
+             top: 7px;
+             left: -7px;
+             content: "";
+             display: block;
+             width: 0;
+             border-top: solid 7px transparent;
+             border-right: solid 7px #477cd7;
+             border-bottom: solid 7px transparent;
+         }
+        .qr-code-box:after {
+             position: absolute;
+             top: 7px;
+             left: -6px;
+             content: "";
+             display: block;
+             width: 0;
+             border-top: solid 7px transparent;
+             border-right: solid 7px #fff;
+             border-bottom: solid 7px transparent;
+         }
+        .qr-code-box .qr-code-img{
+            width:140px;
+            height:140px;
+            padding:10px;
+        }
+        .qr-code-box .qr-code-text{
+            margin:0;
+            padding:5px 0;
+            border-top: 1px solid #e5e5e5;
+            color: #505050;
+            text-align: center;
+        }
+    </style>
+</head>
+<body ng-app="myApp">
+    <div ng-controller="myCtrl">
+        <h1>下拉单选框-指令</h1>
+        <qr-code url="url"></qr-code>
+    </div>
+<script type="text/javascript" src="js/angular.js"></script>
+<script type="text/ng-template" id="qr-code.html">
+    <div class="qr-code">
+        <img class="qr-code-img-small" src="img/ewm.png" ng-mouseover="show()" ng-mouseleave="hide()" alt="">
+        <div class="qr-code-box" ng-if="is_show">
+            <img class="qr-code-img" ng-src="{{url}}" alt="">
+            <p class="qr-code-text">扫描二维码</p>
+        </div>
+    </div>
+</script>
+<script>
+    var myApp=angular.module('myApp',[])
+    .controller('myCtrl',function($scope){
+        $scope.url='img/iphone.png';
+    })
+    .directive('qrCode',function(){
+        return{
+            restrict:'AE',
+            scope:{
+                url:'='
+            },
+            templateUrl:'qr-code.html',
+            transclude:true,
+            controller:function($scope){
+                $scope.is_show=false;
+                $scope.show=function(){
+                    $scope.is_show=!$scope.is_show;
+                };
+                $scope.hide=function(){
+                    $scope.is_show=!$scope.is_show;
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>

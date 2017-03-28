@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp">
+<head>
+    <meta charset="UTF-8">
+    <title>表单验证-(ng-change/ng-blur/ng-focus)</title>
+    <style>
+        .control-label {
+            display: block;
+        }
+        .title {
+            display: inline-block;
+            width: 81px;
+            text-align: right;
+        }
+        .error-text {
+            color: red;
+        }
+    </style>
+</head>
+<body ng-controller="MyController">
+<div>
+    <form name="myForm" novalidate>
+        <label class="control-label">
+            <span class="title">用户名：</span>
+            <input type="text"
+                   name="userName"
+                   ng-model="username"
+                   required
+                   ng-required="true"
+                   ng-pattern="/^[0-9A-Za-z_]{6,16}$/" ng-change="change()">
+            <span>{{username}}</span>
+            <!--当input有校验属性时，如果输入的值不符合校验条件，model会被更新成undefined，此时当符合校验数据时，ng-change才会执行-->
+         </label>
+        <label class="control-label">
+            <span class="title">是否同步：</span>
+            <input type="checkbox"
+                   ng-model="check"
+                   ng-true-value="'YES'"
+                   ng-false-value="'NO'"
+                   ng-change="change()">
+            <span>{{check}}</span>
+        </label>
+        <label class="control-label">
+            <input type="radio" ng-model="radio" ng-change="change()" value="value1">
+            <input type="radio" ng-model="radio" ng-change="change()" ng-value="'value2'">
+            <span>{{radio}}</span>
+        </label>
+    </form>
+</div>
+<script type="text/javascript" src="js/angular.js"></script>
+<script type="text/javascript">
+    angular.module('myApp', []).controller('MyController', function ($scope) {
+        $scope.radio='value2';
+        $scope.change=function(){
+            alert('change');
+        }
+    });
+</script>
+</body>
+</html>

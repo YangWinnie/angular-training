@@ -150,8 +150,27 @@
         $scope.is_search=false;
         $rootScope.show=function(){
           $rootScope.is_show=true;
+          $rootScope.is_edit=false;
         };
-        $scope.lists=[];
+        $scope.lists=[{
+            id:'1',
+            name:'平凡的世界',
+            author:'路遥',
+            press:'人民出版社',
+            price:'23'
+        },{
+            id:"2",
+            name:'老人与海',
+            author:'海明威',
+            press:'人民出版社',
+            price:'18'
+        },{
+            id:"3",
+            name:'最好的我们',
+            author:'八月长安',
+            press:'人民出版社',
+            price:'15'
+        }];
         $rootScope.$on('add-book',function(e,param){
             if(!$scope.is_edit){
                 $scope.booklist=param;
@@ -178,13 +197,6 @@
             $scope.lists.splice(index, 1);
         };
 //        编辑
-        $scope.booklist={
-            id:'',
-            name:'',
-            author:'',
-            press:'',
-            price:''
-        };
         $scope.edit=function(index){
             $rootScope.is_show=true;
             $rootScope.is_edit=true;
@@ -202,8 +214,9 @@
         $scope.search=function(){
             $scope.is_search=true;
             angular.forEach($scope.lists,function(item,index){
-                for($scope.key in item){
-                    if(item[$scope.key].indexOf($scope.book.search)!=-1){
+                for(key in item){
+                    console.log(item[key]);
+                    if(item[key].indexOf($scope.book.search)!=-1){
                         $scope.searchlist.push(item);
                         break;
                     }

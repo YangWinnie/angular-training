@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>下拉复选框-指令(优化)</title>
+    <style>
+        .multi-select{
+            position: relative;
+            font-size: 14px;
+            color: #505050;
+        }
+        .multi-select .multi-select-content{
+            display: inline-block;
+            background: transparent;
+            border: 1px solid #e5e5e5;
+            color: #505050;
+            height:24px;
+            line-height: 24px;
+            overflow: hidden;
+        }
+        .multi-select .multi-select-list{
+            position: absolute;
+            top:28px;
+            left:0;
+            margin:0;
+            list-style: none;
+            padding-left:0;
+            border:1px solid #e5e5e5;
+
+        }
+        .multi-select .multi-select-list .button-group{
+            padding:5px 5px 5px 0;
+            border-top:1px solid #e5e5e5;
+            text-align: right;
+        }
+        .multi-select .multi-select-list .button-group .btn{
+            display:inline-block;
+            border:none;
+            font-size: 12px;
+            padding:2px 6px;
+            -webkit-border-radius:2px;
+            -moz-border-radius:2px;
+            border-radius:2px;
+        }
+        .multi-select .multi-select-list .button-group .btn-save{
+            background: #559ff3;
+            color: #fff;
+        }
+        .multi-select .multi-select-list .button-group .btn-close{
+            background: #b0b0b0;
+            color: #fff;
+        }
+    </style>
+</head>
+<body ng-app="myApp">
+<div ng-controller="myCtrl">
+    <h1>下拉复选框-指令</h1>
+    <multiple-select category="category" key="key" data='lists' send="getCategory(params)" width="150"></multiple-select>
+</div>
+<script type="text/javascript" src="js/angular.js"></script>
+<script type="text/ng-template" id="multiple-select.html">
+    <div class="multi-select">
+        <span class="multi-select-content" ng-click="show()" ng-style="{'width':{{width}}+'px'}">{{category}}</span>
+        <ul class="multi-select-list" ng-if="is_show" ng-style="{'width':{{width}}+'px'}">
+            <li ng-repeat="list in data track by $index">
+                <label><input type="checkbox" ng-click="setList($event,list)" ng-checked="check(list)"><span ng-bind="list.{{key}}"></span></label>
+            </li>
+            <li class="button-group">
+                <button class="btn btn-close" ng-click="close()">关闭</button>
+                <button class="btn btn-save" ng-click="save()">确定</button>
+            </li>
+        </ul>
+    </div>
+</script>
+<script>
+    var myApp=angular.module('myApp',[])
+            .controller('myCtrl',function($scope){
+                $scope.lists=[
+                    {val:0,keys:'中国'},
+                    {val:1,keys:'美国'},
+                    {val:2,keys:'英国'},
+                    {val:3,keys:'韩国'}
+                ];
+                $scope.category='中国';
+                $scope.key='keys';
+                $scope.getCategory = function (params) {//获取选中的值列表，写入输入框中
+                    $scope.keys=[];
+                    angular.forEach(params,function (item,index) {
+                        $scope.keys.push(item[$scope.key]);
+                    });
+                    $scope.category=$scope.keys.join('/');
+                };
+            })
+            .directive('multipleSelect',function(){
+                return {
+                    restrict:'AE',
+                    scope:{
+                        category:'=',
+                        width:'=',
+                        data:'=',
+                        key:'=',
+                        send:'&'
+                    },
+                    transclude:true,
+                    templateUrl:'multiple-select.html',
+                    controller:function($scope){
+                        console.log($scope.key);
+                        $scope.checkedList = [];//选中的值列表
+                        $scope.result = [];//主要存入选中的值的key值
+                        $scope.is_show=false;
+                        $scope.show=function(){//下拉列表显示的时候，传入初始值
+                            $scope.is_show=!$scope.is_show;
+                            $scope.result=$scope.category.split('/');
+                            angular.forEach($scope.category.split('/'),function(item){
+                                angular.forEach($scope.data,function(list){
+                                    if(item==list[$scope.key]){
+                                        $scope.checkedList.push(list);
+                                    }
+                                })
+                            })
+                        };
+                        $scope.check=function(item){//下拉列表显示的时候检查该值是否被选中，如果被选中，返回true
+                            if(($scope.category.split('/')).indexOf(item[$scope.key])!==-1){
+                                return true;
+                            }else{
+                                return false;
+                            }
+                        };
+                        $scope.setList = function (event,list) {//获取选中的值，并且入栈
+                            if(event.target.checked){//选中该值的时候，判断该值是否存在在值数组中，如果没有，入栈
+                                if($scope.result.indexOf(list[$scope.key]) == -1){
+                                    $scope.result.push(list[$scope.key]);
+                                    $scope.checkedList.push(list);
+                                }
+                            }else{//取消选中的时候，判断该值是否存在于数组中，如果存在，则在数组中删除该值
+                                $scope.checkedList.splice($scope.result.indexOf(list[$scope.key]),1);//上下两行位置不可调换
+                                $scope.result.splice($scope.result.indexOf(list[$scope.key]),1);
+                            }
+                        };
+
+                        $scope.save = function () {//保存的时候，传递选中的值数组
+                            $scope.is_show=!$scope.is_show;
+                            $scope.send({params:$scope.checkedList});
+                            $scope.checkedList=[];
+                            $scope.result=[];
+                        };
+                        $scope.close=function(){//关闭下拉列表，数组置为空
+                            $scope.is_show=false;
+                            $scope.checkedList=[];
+                            $scope.result=[];
+                        }
+                    }
+                }
+            });
+</script>
+</body>
+</html>

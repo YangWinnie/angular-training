@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>下拉单选框-指令</title>
+    <style>
+        .radio-select{
+            position: relative;
+            font-size: 14px;
+            color: #505050;
+        }
+        .radio-select .radio-select-content{
+            display: inline-block;
+            background: transparent;
+            border: 1px solid #e5e5e5;
+            color: #505050;
+            height:24px;
+            line-height: 24px;
+            overflow: hidden;
+        }
+        .radio-select .radio-select-list{
+            position: absolute;
+            top:28px;
+            left:0;
+            margin:0;
+            list-style: none;
+            padding-left:0;
+            border:1px solid #e5e5e5;
+        }
+        .radio-select .radio-select-list li{
+            background: #fff;
+            color: #707070;
+            cursor: pointer;
+            text-align: center;
+        }
+        .radio-select .radio-select-list li:hover{
+            background: #559ff3;
+            color: #fff;
+        }
+        .radio-select .radio-select-list li.selected{
+            background: #559ff3;
+            color: #fff;
+        }
+    </style>
+</head>
+<body ng-app="myApp">
+    <div ng-controller="myCtrl">
+        <h1>下拉单选框-指令</h1>
+        <radio-select
+                category="category" send="getCategory(params)"
+                lists="lists" width="150" key="key"></radio-select>
+    </div>
+<script type="text/javascript" src="js/angular.js"></script>
+<script type="text/ng-template" id="radio-select.html">
+    <div class="radio-select">
+        <span class="radio-select-content" ng-click="show(lists)" ng-style="{'width':{{width}}+'px'}">{{category}}</span>
+        <ul class="radio-select-list" ng-if="is_show" ng-style="{'width':{{width}}+'px'}">
+            <li ng-repeat="list in lists track by $index"
+                ng-bind="list.{{key}}"
+                ng-click="setList($event,list)"
+                ng-class="{'selected':check(list)}"></li>
+        </ul>
+    </div>
+</script>
+<script>
+    var myApp=angular.module('myApp',[])
+    .controller('myCtrl',function($scope){
+        $scope.lists=[
+            {val:0,keys:'中国'},
+            {val:1,keys:'美国'},
+            {val:2,keys:'英国'},
+            {val:3,keys:'韩国'}
+        ];
+        $scope.category='中国';
+        $scope.key='keys';
+        $scope.getCategory = function (params) {//获取选中的值列表，写入输入框中
+            $scope.category=params[$scope.key];
+        };
+    })
+    .directive('radioSelect',function(){
+        return {
+            restrict:'AE',
+            scope:{
+                category:'=',
+                width:'=',
+                lists:'=',
+                key:'=',
+                send:'&'
+            },
+            transclude:true,
+            templateUrl:'radio-select.html',
+            controller:function($scope){
+                $scope.is_show=false;
+                $scope.show=function(){
+                    $scope.is_show=!$scope.is_show;
+                };
+                $scope.setList = function (event,list) {
+                    $scope.send({params:list});
+                    $scope.is_show=!$scope.is_show;
+                };
+                $scope.check=function(item){
+                    if($scope.category==item[$scope.key]){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>

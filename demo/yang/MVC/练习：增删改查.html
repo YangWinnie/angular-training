@@ -47,7 +47,7 @@
             display: block;
             margin-bottom:10px;
         }
-        .control-label span{
+        .control-label .control-label-title{
             display: inline-block;
             width:64px;
             text-align: right;
@@ -72,6 +72,16 @@
             border:1px solid #e5e5e5;
             text-align: center;
             padding:3px 0;
+        }
+        button[disabled]{
+            cursor: not-allowed;
+            opacity: 0.65;
+        }
+        .error-text{
+            color: red;
+        }
+        .error-input{
+            border-color: red;
         }
     </style>
 </head>
@@ -126,14 +136,22 @@
         </div>
     </div>
     <div class="container-input" ng-if="is_show" ng-controller="addCtrl">
-        <form class="book-form">
+        <form class="book-form" name="bookForm" novalidate>
             <div class="book-header">添加书目</div>
             <div class="book-body">
-                <label class="control-label"><span>编号：</span><input type="text" ng-model="book.id" ng-disabled="is_edit"></label>
-                <label class="control-label"><span>书名：</span><input type="text" ng-model="book.name"></label>
-                <label class="control-label"><span>作者：</span><input type="text" ng-model="book.author"></label>
-                <label class="control-label"><span>出版社：</span><input type="text" ng-model="book.press"></label>
-                <label class="control-label"><span>价格：</span><input type="text" ng-model="book.price"></label>
+                <label class="control-label"><span class="control-label-title">编号：</span>
+                    <input type="text" name="bookId"
+                           ng-model="book.id"
+                           ng-pattern="/^[a-zA-Z][A-Za-z0-9]{5,9}/"
+                           minlength="6" maxlength="10"
+                           ng-blur="checkValid()"
+                           ng-disabled="is_edit">
+                    <span ng-if="!is_edit" ng-class="{'error-text':bookForm.bookId.$dirty&&bookForm.bookId.$invalid}">以字母开头，6-10位数字和字母</span>
+                </label>
+                <label class="control-label"><span class="control-label-title">书名：</span><input type="text" ng-model="book.name"></label>
+                <label class="control-label"><span class="control-label-title">作者：</span><input type="text" ng-model="book.author"></label>
+                <label class="control-label"><span class="control-label-title">出版社：</span><input type="text" ng-model="book.press"></label>
+                <label class="control-label"><span class="control-label-title">价格：</span><input type="text" ng-model="book.price"></label>
             </div>
             <div class="book-footer">
                 <button class="btn btn-cancel" ng-click="cancel()">取消</button>
@@ -150,26 +168,9 @@
         $scope.is_search=false;
         $rootScope.show=function(){
           $rootScope.is_show=true;
+          $rootScope.is_edit=false;
         };
-        $scope.lists=[{
-            id:'1',
-            name:'平凡的世界',
-            author:'路遥',
-            press:'人民出版社',
-            price:'23'
-        },{
-            id:"2",
-            name:'老人与海',
-            author:'海明威',
-            press:'人民出版社',
-            price:'18'
-        },{
-            id:"3",
-            name:'最好的我们',
-            author:'八月长安',
-            press:'人民出版社',
-            price:'15'
-        }];
+        $scope.lists=[];
         $rootScope.$on('add-book',function(e,param){
             if(!$scope.is_edit){
                 $scope.booklist=param;
@@ -178,17 +179,14 @@
         });
         $rootScope.$on('edit-book',function(e,param){
             if($scope.is_search){
-                angular.forEach($scope.searchlist,function(item,index){
-                    if(item.id==param.id){
-                        $scope.searchlist[index]=param;
-                    }
-                })
+                $scope.searchlist[param.index]=param.book;
+//                angular.forEach($scope.searchlist,function(item,index){
+//                    if(item.id==param.id){
+//                        $scope.searchlist[index]=param;
+//                    }
+//                })
             }else{
-                angular.forEach($scope.lists,function(item,index){
-                    if(item.id==param.id){
-                        $scope.lists[index]=param;
-                    }
-                })
+                $scope.lists[param.index]=param.book;
             }
         });
 //        删除
@@ -209,20 +207,21 @@
             if($scope.is_search){
                $scope.booklist=$scope.searchlist[index];
             }else{
-                console.log('aaa');
                 $scope.booklist=$scope.lists[index];
             }
             console.log($scope.booklist);
-            $rootScope.$emit('edit',$scope.booklist);
+            $rootScope.$emit('edit',{
+                index:index,
+                booklist:$scope.booklist
+            });
         };
 //        搜索
         $scope.searchlist=[];
         $scope.search=function(){
             $scope.is_search=true;
             angular.forEach($scope.lists,function(item,index){
-                for(key in item){
-                    console.log(item[key]);
-                    if(item[key].indexOf($scope.book.search)!=-1){
+                for($scope.key in item){
+                    if(item[$scope.key].indexOf($scope.book.search)!=-1){
                         $scope.searchlist.push(item);
                         break;
                     }
@@ -243,16 +242,21 @@
             press:'',
             price:''
         };
+
         $rootScope.$on('edit',function(e,param){
             console.log(param);
-            $rootScope.books=angular.copy(param);
+            $rootScope.index=param.index;
+            $rootScope.books=param.booklist;
             return $rootScope.books;
         });
         $scope.book=$rootScope.is_edit?$rootScope.books:$scope.bookss;
         $scope.add=function(){
            $rootScope.is_show=false;
             if($rootScope.is_edit){
-                $rootScope.$emit('edit-book', $scope.book);
+                $rootScope.$emit('edit-book', {
+                    index:$rootScope.index,
+                    book:$scope.book
+                });
             }else{
                 $rootScope.$emit('add-book', $scope.book);
             }
