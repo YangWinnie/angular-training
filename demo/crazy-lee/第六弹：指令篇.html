@@ -38,7 +38,7 @@
     <hr>
     <rabbit-select category="category" send="send(params)"></rabbit-select>
 </div>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular.js"></script>
+<script type="text/javascript" src="../yang/js/angular.js"></script>
 <script type="text/ng-template" id="rabbit-select.html">
     <div class="rabbit-select">
         <dl class="rabbit-select-content">
@@ -59,7 +59,7 @@
         $scope.name = 'Are you ready';
 
         $scope.change = function () {
-            // console.log('change');
+             console.log('change');
         };
 
         $scope.category = "美国";
@@ -84,6 +84,8 @@
             },
             link: function (scope, element, attrs) {
                 // DOM操作
+                console.log(element);
+                console.log(scope[attrs.name]);
                 element.text(scope[attrs.name] + "?");
 
                 //自动回调

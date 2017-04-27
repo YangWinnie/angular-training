@@ -57,7 +57,7 @@
     <h1>下拉复选框-指令</h1>
     <multiple-select category="category" key="key" data='lists' send="getCategory(params)" width="150"></multiple-select>
 </div>
-<script type="text/javascript" src="js/angular.js"></script>
+<script type="text/javascript" src="../js/angular.js"></script>
 <script type="text/ng-template" id="multiple-select.html">
     <div class="multi-select">
         <span class="multi-select-content" ng-click="show()" ng-style="{'width':{{width}}+'px'}">{{category}}</span>
@@ -81,7 +81,7 @@
                     {val:2,keys:'英国'},
                     {val:3,keys:'韩国'}
                 ];
-                $scope.category='中国';
+                $scope.category='中国/美国';
                 $scope.key='keys';
                 $scope.getCategory = function (params) {//获取选中的值列表，写入输入框中
                     $scope.keys=[];

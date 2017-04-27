@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp">
+<head>
+    <meta charset="UTF-8">
+    <title>路由跳转</title>
+    <style>
+
+    </style>
+</head>
+<body ng-controller="MyController">
+<div>
+    <header><h1>It's header</h1></header>
+    <div class="content">
+        <a href="#/a">点击跳转到A页面</a>
+        <a href="#/b">点击跳转到B页面</a>
+        <a href="#/users">user list</a>
+        <a href="#/users/alice">user: alice</a>
+        <div ng-view></div>
+    </div>
+    <footer><h1>It's footer</h1></footer>
+</div>
+<script type="text/javascript" src="../js/angular.js"></script>
+<script type="text/javascript" src="../js/angular-route.js"></script>
+<script type="text/ng-template" id="views.html">
+    <div>It's content</div>
+</script>
+<script type="text/ng-template" id="a.html">
+    <div>这是A页面</div>
+</script>
+<script type="text/ng-template" id="b.html">
+    <div>这是B页面</div>
+</script>
+<script type="text/ng-template" id="user-list.html">
+    <p>User List Page</p>
+</script>
+<script type="text/ng-template" id="user.html">
+    <p>欢迎来到{{params.username | uppercase}} 的世界</p>
+    <span ng-bind="params.username"></span>
+</script>
+<script type="text/javascript">
+    angular.module('myApp', ['ngRoute'])
+    .controller('MyController', function ($scope) {
+
+    }).controller('AController', function ($scope) {
+
+    }).controller('BController', function ($scope) {
+
+    }).controller('UserListCtrl',function ($scope) {
+
+    }).controller('UserCtrl',function ($scope,$routeParams) {
+        $scope.params = $routeParams;
+    }).config(['$routeProvider', function ($routeProvider) {
+        $routeProvider.when('/', {
+            templateUrl: 'views.html',
+            controller : 'MyController'
+        }).when('/a', {
+            templateUrl: 'a.html',
+            controller : 'AController'
+        }).when('/b', {
+            templateUrl: 'b.html',
+            controller : 'BController'
+        }).when('/users', {
+            templateUrl: 'user-list.html',
+            controller : 'UserListCtrl'
+        }).when('/users/:username', {
+            templateUrl: 'user.html',
+            controller : 'UserCtrl'
+        }).otherwise({
+            redirectTo: '/'
+        });
+    }]);
+</script>
+</body>
+</html>

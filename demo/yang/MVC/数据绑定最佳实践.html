@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AngularJs-列表增删改查</title>
+</head>
+<body ng-app="myApp">
+    <div ng-controller="myCtrl"><h1>Hello {{clock.now}}!</h1></div>
+<script type="text/javascript" src="../js/angular.js"></script>
+<script>
+    var myApp=angular.module('myApp',[]);
+    myApp.controller('myCtrl',function($scope,$interval){
+        $scope.clock={
+            now:new Date()
+        };
+        $scope.updateClock=function(){
+            $scope.clock.now=new Date();
+        };
+        $interval(function(){
+            $scope.updateClock();
+//            $scope.$apply($scope.updateClock()); //使用apply函数会报错
+        },1000);
+        $scope.updateClock();
+    });
+</script>
+</body>
+</html>

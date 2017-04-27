@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp">
+<head>
+    <meta charset="UTF-8">
+    <title>路由跳转</title>
+    <style>
+
+    </style>
+</head>
+<body ng-controller="MyController">
+<div>
+    <header><h1>It's header</h1></header>
+    <div class="content">
+        <nav>
+            <a ui-sref="source">房源相关配置</a>
+            <a ui-sref="clients">客源相关配置</a>
+            <a ui-sref="bargain">成交相关配置</a>
+        </nav>
+        <div ui-view></div>
+    </div>
+    <footer><h1>It's footer</h1></footer>
+</div>
+<script type="text/javascript" src="../js/angular.js"></script>
+<script type="text/javascript" src="../js/angular-ui-router.js"></script>
+<script type="text/ng-template" id="source.html">
+    <div>这是房源配置页面</div>
+    <ul>
+        <li ng-repeat="item in source">
+            <span>{{item.uuid}}</span>
+            <span>{{item.community}}</span>
+        </li>
+    </ul>
+</script>
+<script type="text/ng-template" id="clients.html">
+    <div>这是客源配置页面</div>
+    <ul>
+        <li ng-repeat="item in clients">
+            <a ui-sref=".client({clientId:item.clientname})">{{item.clientname}}</a>
+        </li>
+    </ul>
+    <div ui-view></div>
+</script>
+<script type="text/ng-template" id="client.html">
+    <div>这是客源的详细信息</div>
+</script>
+<script type="text/ng-template" id="bargain.html">
+    <div>这是成交配置页面</div>
+</script>
+<script type="text/javascript">
+    angular.module('myApp',['ui.router'])
+            .config(function($stateProvider,$urlRouterProvider){
+                $urlRouterProvider.otherwise('/source');
+                $stateProvider
+                        .state('source',{
+                            url:'/source',
+                            templateUrl:'source.html',
+                            controller:'SourceCtrl'
+                        })
+                        .state('clients',{
+                            url:'/clients',
+                            templateUrl:'clients.html',
+                            controller:'ClientsCtrl'
+                        })
+                        .state('clients.client',{
+                            url:'/:clientId',
+                            templateUrl:'client.html',
+                            controller:'ClientCtrl'
+                        })
+                        .state('bargain',{
+                            url:'/bargain',
+                            templateUrl:'bargain.html',
+                            controller:'BargainCtrl'
+                        });
+            })
+            .controller('MyController',function($scope){
+
+            })
+            .controller('SourceCtrl',function ($scope) {
+                $scope.source=[
+                    {uuid:'zz1234',community:'康桥华城'},
+                    {uuid:'zz1235',community:'华南城'},
+                    {uuid:'zz1236',community:'锦艺城'}
+                ];
+            })
+            .controller('ClientsCtrl',function ($scope,$stateParams) {//$stateParams接收页面跳转时传递的参数
+                $scope.clients=[
+                    {uuid:'zz1234',clientname:'张三'},
+                    {uuid:'zz1235',clientname:'李四'},
+                    {uuid:'zz1236',clientname:'王五'}
+                ];
+                $scope.client={};
+                angular.forEach($scope.clients,function(item,index){
+                    if(item.uuid==$stateParams.clientId){
+                        $scope.client=item;
+                    }
+                });
+            })
+            .controller('ClientCtrl',function ($scope,$stateParams) {
+                console.log($stateParams);
+                
+            })
+            .controller('BargainCtrl',function ($scope) {
+
+            });
+</script>
+</body>
+</html>

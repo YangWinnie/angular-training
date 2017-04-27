@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>二维码-指令</title>
+</head>
+<body ng-app="myApp">
+<div ng-controller="myCtrl">
+    <h1>指令-scope</h1>
+    <my-directive data="name" id="测试一下" callback="func()" my-attr="hello {{name1}}"></my-directive>
+</div>
+<script type="text/javascript" src="../js/angular.js"></script>
+<script type="text/ng-template" id="my-directive.html">
+    <ul>
+        <li ng-repeat="item in myData">
+            {{item.name}}
+        </li>
+    </ul>
+    <span>{{myId}}</span>
+</script>
+<script>
+    var myApp = angular.module('myApp', [])
+            .controller('myCtrl', function ($scope) {
+                $scope.name=[
+                    {id:1,name:'Amy'},
+                    {id:2,name:'Jack'},
+                    {id:3,name:'Rose'}
+                ];
+                $scope.name1='Jerry';
+            })
+            .directive('myDirective', function () {
+                return {
+                    restrict   : 'AE',
+                    scope      : {
+                        myData: '=data',
+                        myId  : '@id',
+                        myAttr:'@'
+                    },
+                    templateUrl: 'my-directive.html',
+                    transclude : true,
+                    controller : function ($scope) {
+                        console.log($scope.myData);
+                        console.log($scope.myId);
+                        $scope.func=function(){
+
+                        }
+                    }
+                }
+            });
+</script>
+</body>
+</html>

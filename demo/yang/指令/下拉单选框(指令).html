@@ -35,7 +35,7 @@
                 category="category" send="getCategory(params)"
                 lists="lists" width="150" key="key"></radio-select>
     </div>
-<script type="text/javascript" src="js/angular.js"></script>
+<script type="text/javascript" src="../js/angular.js"></script>
 <script type="text/ng-template" id="radio-select.html">
     <div class="radio-select">
         <span class="radio-select-content" ng-click="show()" ng-style="{'width':{{width}}+'px'}">{{category}}</span>
@@ -74,11 +74,13 @@
             transclude:true,
             templateUrl:'radio-select.html',
             controller:function($scope){
+                console.log($scope.key);
                 $scope.is_show=false;
                 $scope.show=function(){
                     $scope.is_show=!$scope.is_show;
                 };
                 $scope.setList = function (event,list) {
+                    console.log(list);
                     $scope.send({params:list});
                     $scope.is_show=!$scope.is_show;
                 };

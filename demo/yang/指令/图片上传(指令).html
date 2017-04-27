@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>图片上传-指令</title>
+    <style>
+        .upload .upload-file{
+             position: absolute;
+             top: 0;
+             left: 0;
+             right: 0;
+             bottom: 0;
+             z-index:1;
+             width: 100%;
+             opacity: 0;
+         }
+        .upload .upload-btn {
+            position: relative;
+            width: 100%;
+        }
+        .upload .upload-btn-btn{
+             text-align: center;
+             padding:0 8px;
+             border-radius:2px;
+             background: #4aa2fe;
+             color: #fff;
+         }
+        .upload .upload-plus {
+            position: relative;
+            width: 100%;
+            height: 120px;
+            background: #eee;
+            border: 1px dashed #E0DED9;
+        }
+        .upload .upload-plus-plus{
+             position: relative;
+             display: block;
+             font-size: 50px;
+             text-align: center;
+             top: 10%;
+         }
+        .upload .upload-plus-text{
+             position: relative;
+             display: block;
+             width:100%;
+             text-align: center;
+         }
+    </style>
+</head>
+<body ng-app="myApp">
+    <div ng-controller="myCtrl">
+        <file-upload
+                width="120"
+                classname="form2"
+                accepttype="image/*"
+                ismultiple="multiple"
+                upload="getFileList(params)"></file-upload>
+    </div>
+<script type="text/javascript" src="../js/jquery-1.11.3.js"></script>
+<script type="text/javascript" src="../js/angular.js"></script>
+<script type="text/ng-template" id="file-upload.html">
+    <form class="upload {{ classname }}" name="uploadForm" id="{{idname}}" ng-style="{'width':width+'px'}">
+        <div class="upload-btn" ng-if="appearance=='button'">
+            <input type="file" class="upload-file"
+                   accept="{{accepttype}}"
+                   ng-click="reset()"
+                   name="files"
+                   onchange="angular.element(this).scope().uploadImage(this)">
+            <button class="btn upload-btn-btn" ng-style="{'width':width+'px'}">上传图片</button>
+        </div>
+        <div class="upload-plus" ng-if="appearance!=='button'">
+            <input type="file" class="upload-file" ng-click="reset()" name="files" multiple onchange="angular.element(this).scope().uploadImage(this)">
+            <span class="upload-plus-plus">+</span>
+            <span class="upload-plus-text">上传图片</span>
+        </div>
+    </form>
+</script>
+<script>
+    var myApp=angular.module('myApp',[])
+    .controller('myCtrl',function($scope){
+        $scope.getFileList=function(params){
+            console.log(params);
+        };
+    })
+    .directive('fileUpload',function(){
+        return {
+            restrict   : 'AE',
+            scope:{
+                width:'=',
+                height:'=',
+                appearance:'@',
+                idname:'@',
+                classname:'@',
+                ismultiple:'@',
+                accepttype:'@',
+                upload:'&'
+            },
+            transclude:true,
+            templateUrl: 'file-upload.html',
+            controller:function($scope,$element,$attrs,$timeout){
+                console.log($element);
+                if($scope.ismultiple=="multiple"){
+                    $timeout(function(){
+                        angular.element("input[name='files']")[0].setAttribute('multiple','');
+                    },100);
+                }
+                $scope.uploadImage=function (element) {
+                    $scope.upload({params:element.files});
+                };
+                $scope.reset=function(){
+                    angular.element("form[name='uploadForm']")[0].reset();
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>

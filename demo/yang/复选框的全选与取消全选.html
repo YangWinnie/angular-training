@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+    <meta charset="UTF-8"/>
+    <title>复选框全选与取消全选</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="3.3.6/css/bootstrap.min.css">
+    <style type="text/css">
+
+    </style>
+</head>
+<body>
+<div ng-controller="MyCtrl">
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>
+                <input type="checkbox"
+                       ng-model="selectAll" ng-click="all(selectAll)">
+            </th>
+            <th>拼团活动编号</th>
+            <th>拼团活动名称</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="list in lists" ng-cloak>
+            <td><input type="checkbox"
+                       ng-model="list.isSelect"
+                       ng-click="chk(list.id,list.isSelect)"></td>
+            <td><span>{{list.id}}</span></td>
+            <td><span>{{list.name}}</span></td>
+        </tr>
+        <tr>
+            <td colspan="3" style="text-align: right;">
+                <button class="btn btn-success" ng-click="submit()">提交</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div ng-controller="OtherCtrl">
+    <table class="table table-bordered" ng-if="selectArr.length">
+        <thead>
+        <tr>
+            <th>拼团活动编号</th>
+            <th>拼团活动名称</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="item in selectArr" ng-cloak>
+            <td><span>{{item.id}}</span></td>
+            <td><span>{{item.name}}</span></td>
+            <td><a ng-click="delete(item.id)" style="cursor: pointer;">删除</a></td>
+        </tr>
+        </tbody>
+    </table>
+    <div ng-if="chooseArr.length==0">
+        <p>暂无数据</p>
+    </div>
+</div>
+<script src="js/angular.js"></script>
+<script src="js/angular-scroll.js"></script>
+<script>
+    angular.module('myApp', [])
+            .controller('MyCtrl', function ($scope,$rootScope,$http) {
+                $http.get('data/lists.json').then(function(result){
+                    $scope.lists=result.data.data;
+                });
+                $scope.chooseArr=[];
+                $scope.all=function(v){
+                    angular.forEach($scope.lists,function(item,index){
+                        item.isSelect=v;
+                    });
+                    if(v){
+                        $scope.chooseArr=angular.copy($scope.lists);
+                    }else{
+                        $scope.chooseArr=[];
+                    }
+                };
+                $scope.chk=function(v,k){
+                    if(k){
+                        angular.forEach($scope.lists,function(item,index){
+                            if(v==item.id){
+                                $scope.chooseArr.push(item);
+                                return;
+                            }
+                        });
+                        if($scope.chooseArr.length==$scope.lists.length){
+                            $scope.selectAll=k;
+                        }
+                    }else{
+                        if($scope.chooseArr.length!=0){
+                            angular.forEach($scope.chooseArr,function(item,index){
+                                if(v==item.id){
+                                    $scope.chooseArr.splice(index,1);
+                                    return;
+                                }
+                            })
+                        }
+                        if($scope.lists.length != $scope.chooseArr.length){
+                            $scope.selectAll = k;
+                        }
+                    }
+                };
+                $scope.submit=function(){
+                    $rootScope.$emit('select-data',$scope.chooseArr);
+                    $http.post('data/lists.json',$scope.chooseArr).then(function(result){
+                        console.log(result.config.data);
+                    });
+                }
+            })
+            .controller('OtherCtrl',function($scope,$rootScope){
+                $scope.selectArr=[];
+                $rootScope.$on('select-data',function(event,data){
+                    $scope.selectArr=angular.copy(data);
+                });
+                $scope.delete=function(id){
+                    angular.forEach($scope.selectArr,function(item,index){
+                        if(id==item.id){
+                            $scope.selectArr.splice(index,1);
+                            return;
+                        }
+                    })
+                }
+            });
+</script>
+</body>
+</html>
